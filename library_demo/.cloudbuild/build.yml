@@ -1,0 +1,22 @@
+# This YAML is the default template and can be modified based on this 
+---
+version: 2.0
+steps:
+  BUILD:
+  - maven:
+      image: cloudbuild@maven4.0.0-jdk8-open # 可以自定义镜像地址
+      inputs:
+        settings:
+          public_repos:
+            - https://mirrors.huawei.com/maven
+        cache: true # 是否开启缓存
+        command: mvn package -Dmaven.test.failure.ignore=true -U -e -X -B
+  - upload_artifact:
+      inputs:
+        path: "**/target/*.?ar"
+  - build_image:
+      inputs:
+        organization: codeci_gray # 组织名称
+        image_name: maven_demo # 镜像名称
+        image_tag: 1.0 # 镜像版本
+        dockerfile_path: ./Dockerfile

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.huawei.ibooking.mapper.StudentMapper">
+    <resultMap id="stu" type="com.huawei.ibooking.model.StudentDO"/>
+    <resultMap id="rcd" type="com.huawei.ibooking.model.Booking_xxxDO"/>
+    <resultMap id="seats" type="com.huawei.ibooking.model.SeatDO"/>
+
+
+    <select id="getStudents" resultMap="stu">
+        select id, stuNum, name, password
+        from tbl_student
+    </select>
+
+    <select id="getStudent" resultMap="stu" parameterType="java.lang.String">
+        select id, stuNum, name, password
+        from tbl_student
+        where stuNum = #{stuNum}
+    </select>
+
+    <update id="saveStudent" parameterType="com.huawei.ibooking.model.StudentDO">
+        merge into tbl_student (stuNum, name, password) key (stuNum)
+            values (#{stu.stuNum}, #{stu.name}, #{stu.password})
+    </update>
+
+    <delete id="deleteStudent" parameterType="java.lang.String">
+        delete
+        from tbl_student
+        where stuNum = #{stuNum}
+    </delete>
+
+    <select id="stu_Exist" resultMap="stu" parameterType="java.lang.String">
+        select stuNum
+        from tbl_student
+        where stuNum = #{stuNum}
+    </select>
+
+    <select id="get_Records" resultMap="rcd" parameterType="java.lang.String">
+        select  id, buildingNum, classroomNum, seat_Id, begin_Time, end_Time, if_Online, stuId
+        from  tbl_booking_xxx
+        where stuId = #{stuId}
+    </select>
+
+    <select id="get_Seats" resultMap="seats" parameterType="java.util.Map">
+        select id, buildingNum, classRoomNum, seat_Id, if_Open, open_Time, close_Time, if_Near_Window, if_Near_Power
+        from tbl_seat
+        where buildingNum = #{buildingNum} and classroomNum = #{classroomNum} and if_Near_Window = #{if_Near_Window} and if_Near_Power = #{if_Near_Power}
+    </select>
+
+    <select id="pre_Seat" resultMap="seats" parameterType="java.util.Map">
+        select id, buildingNum, classRoomNum, seat_Id, if_Open, open_Time, close_Time, if_Near_Window, if_Near_Power
+        from tbl_seat
+        where buildingNum = #{buildingNum} and classroomNum = #{classroomNum} and seat_Id = #{seat_Id}
+    </select>
+
+    <select id="his_Seat" resultMap="rcd" parameterType="java.util.Map">
+        select id, buildingNum, classroomNum, seat_Id, begin_Time, end_Time, if_Online, stuId
+        from tbl_booking_xxx
+        where buildingNum = #{buildingNum} and classroomNum = #{classroomNum} and seat_Id = #{seat_Id}
+    </select>
+
+    <insert id="his_Insert" parameterType="java.util.Map">
+        insert into tbl_booking_xxx(buildingNum, classroomNum, seat_Id, begin_Time, end_Time, if_Online, stuId)
+        values (#{buildingNum}, #{classroomNum}, #{seat_Id}, #{begin_Time}, #{end_Time}, #{if_Online}, #{stuId})
+    </insert>
+
+    <select id="last_Id" resultType="java.lang.Integer">
+        SELECT MAX(id) FROM tbl_booking_xxx
+    </select>
+
+    <select id="his_Info" resultMap="rcd" parameterType="java.util.Map">
+        select id, buildingNum, classroomNum, seat_Id, begin_Time, end_Time, if_Online, stuId
+        from tbl_booking_xxx
+        where buildingNum = #{buildingNum} and classroomNum = #{classroomNum} and seat_Id = #{seat_Id} and begin_Time = #{begin_Time} and end_Time = #{end_Time}
+    </select>
+
+</mapper>

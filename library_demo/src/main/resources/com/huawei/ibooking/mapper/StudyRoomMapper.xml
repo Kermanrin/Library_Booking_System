@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.huawei.ibooking.mapper.StudyRoomMapper">
+    <resultMap id="allRooms" type="com.huawei.ibooking.model.StudyRoomDO"/>
+    <resultMap id="Seats_States" type="com.huawei.ibooking.model.Seat_If_Open_State"/>
+
+    <select id="getAllStudyRooms" resultMap="allRooms">
+        select id, buildingNum, classRoomNum
+        from tbl_studyroom
+    </select>
+
+<!--    <update id="saveStudyRoom" parameterType="com.huawei.ibooking.model.StudyRoomDO">-->
+<!--        insert into tbl_studyroom (buildingNum, classRoomNum)-->
+<!--            values (#{study.buildingNum}, #{study.classRoomNum})-->
+<!--    </update>-->
+    <update id="saveStudyRoom" parameterType="com.huawei.ibooking.model.StudyRoomDO">
+        insert into tbl_studyroom (buildingNum, classRoomNum, if_Open, Seat_Id_Set, open_Time, close_Time)
+        select #{study.buildingNum}, #{study.classRoomNum},  #{study.if_Open},  #{study.Seat_Id_Set},  #{study.open_Time},  #{study.close_Time}
+            where not exists (
+        select 1
+        from tbl_studyroom
+        where buildingNum = #{study.buildingNum}
+                and classRoomNum = #{study.classRoomNum}
+                )
+    </update>
+
+    <delete id="deleteStudyRoom" parameterType="java.util.Map">
+        delete
+        from tbl_studyroom
+        where buildingNum = #{buildingNum} and classRoomNum = #{classRoomNum}
+    </delete>
+
+    <select id="getStudyRooms" resultMap="allRooms" parameterType="java.lang.String">
+        select id, buildingNum, classRoomNum, Seat_Id_Set, if_Open, open_Time, close_Time
+        from tbl_studyroom
+        where buildingNum = #{buildingNum}
+    </select>
+
+    <select id="getStudySeats" resultMap="Seats_States" parameterType="java.lang.String">
+        select  seat_Id, if_Open
+        from tbl_seat
+        where buildingNum = #{buildingNum} and  classRoomNum = #{classRoomNum}
+    </select>
+
+    <update id="modifySeatsAttribute" parameterType="java.util.Map">
+        update tbl_seat
+        set if_Open = #{if_Open}
+        where buildingNum = #{buildingNum} and classRoomNum = #{classRoomNum} and seat_Id = #{seat_Id}
+    </update>
+
+    <update id = "modifyStudyRoom" parameterType="java.util.Map">
+        update tbl_studyroom
+        set  if_Open = #{if_Open}, open_Time = #{open_Time}, Seat_Id_Set = #{Seat_Id_Set}, close_Time = #{close_Time}
+        where buildingNum = #{buildingNum} and classRoomNum = #{classRoomNum}
+    </update>
+
+    <update id="modifySeatsOpen" parameterType="java.util.Map">
+        update tbl_seat
+        set if_Open = #{if_Open}, open_Time = #{open_Time}, close_Time = {close_Time}
+        where buildingNum = #{buildingNum} and classRoomNum = #{classRoomNum}
+    </update>
+
+    <update id="modifySeatsNotOpen" parameterType="java.util.Map">
+        update tbl_seat
+        set if_Open = false, open_Time = "0", close_Time = "0"
+        where buildingNum = #{buildingNum} and classRoomNum = #{classRoomNum}
+    </update>
+
+    <delete id="del_Seats" parameterType="java.util.Map">
+        delete
+        from tbl_seat
+        where buildingNum = #{buildingNum} and classRoomNum = #{classRoomNum}
+    </delete>
+
+    <update id="add_Seats" parameterType="java.util.Map">
+        insert into tbl_seat(buildingNum, classRoomNum, seat_Id, if_Open, open_Time, close_Time, if_Near_Window, if_Near_Power)
+        select #{buildingNum}, #{classRoomNum},  #{seat_Id},  #{if_Open},  #{open_Time},  #{close_Time}, #{if_Near_Window}, #{if_Near_Power}
+        where not exists (
+            select 1
+            from tbl_seat
+            where buildingNum = #{buildingNum}
+                and classRoomNum = #{classRoomNum}
+                and seat_Id = #{seat_Id}
+            )
+    </update>
+</mapper>
